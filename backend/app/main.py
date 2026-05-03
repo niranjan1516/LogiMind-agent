@@ -14,6 +14,9 @@ from .services.mapping import generate_route_map
 from .services.routing import optimize_routes
 from .services.forecasting import generate_24h_forecast
 
+import time
+import math
+from fastapi.middleware.cors import CORSMiddleware
 
 # Define IST offset
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -147,3 +150,40 @@ def get_demand_forecast(city: str):
         raise HTTPException(status_code=404, detail=result["error"])
         
     return result
+
+
+@app.get("/fleet/live")
+def get_live_fleet():
+    """
+    Returns real-time GPS coordinates. 
+    Using a sine wave to simulate the truck moving around Mumbai for the UI test.
+    """
+    # Time-based movement calculation
+    t = time.time() / 50 
+    lat = 19.0760 + (math.sin(t) * 0.02)
+    lon = 72.8777 + (math.cos(t) * 0.02)
+    
+    return {
+        "id": "TRK-9021",
+        "location": [lat, lon],
+        "status": "En Route to Bandra",
+        "speed": f"{int(40 + (math.sin(t)*10))} km/h"
+    }
+
+@app.get("/orders/active")
+def get_active_orders():
+    """Returns the current list of active deliveries."""
+    return [
+        {"id": "ORD-8891", "destination": "Andheri East", "status": "In Transit", "eta": "12 Mins"},
+        {"id": "ORD-8892", "destination": "Bandra Kurla Complex", "status": "In Transit", "eta": "25 Mins"},
+        {"id": "ORD-8893", "destination": "Colaba", "status": "Pending", "eta": "1 Hr 10 Mins"},
+        {"id": "ORD-8894", "destination": "Powai", "status": "Pending", "eta": "2 Hrs"},
+    ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # <--- Change this temporarily to "*" to bypass all blocks
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

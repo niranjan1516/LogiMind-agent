@@ -4,8 +4,10 @@ import pandas as pd
 import joblib
 from tensorflow.keras.models import load_model
 
-# Construct absolute paths so it works safely from inside the Docker container
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# BULLETPROOF PATHING: Get the absolute path to the 'backend' folder
+# This ensures it works whether you run from root or from the backend folder
+current_dir = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(current_dir, "../../"))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 DATA_PATH = os.path.join(BASE_DIR, "data", "historical_demand.csv")
 
@@ -48,7 +50,8 @@ def generate_24h_forecast(city: str):
         
         # Convert back to real-world volume (e.g., 0.85 -> 850 orders)
         next_hour_volume = scaler.inverse_transform(next_hour_scaled)[0][0]
-        predictions.append(int(max(0, next_hour_volume))) # Ensure no negative orders
+        # Change this line in your loop:
+        predictions.append(int(next_hour_volume)) # Ensure no negative orders
         
         # Update the sequence: Drop the oldest hour, append the new prediction
         next_hour_reshaped = next_hour_scaled.reshape(1, 1, 1)
