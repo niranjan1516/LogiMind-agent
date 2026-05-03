@@ -1,0 +1,114 @@
+# ==================== PYTHON ====================
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+pipenv/
+poetry.lock
+
+# Python Cache & Compiled Files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+pytest.ini
+
+# ==================== ENVIRONMENT & SECRETS ====================
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Credentials & Secrets
+credentials.json
+secrets.json
+*.key
+*.pem
+.aws/
+
+# ==================== DATA & MODELS ====================
+# Large data files (can be regenerated or stored separately)
+*.csv
+*.parquet
+*.xlsx
+*.xls
+*.json
+data/
+
+# Pre-trained models (can be downloaded separately)
+*.keras
+*.h5
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+models/*.keras
+models/*.pkl
+
+# ==================== IDE & EDITOR ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# ==================== LOGS & TEMPORARY FILES ====================
+*.log
+logs/
+*.tmp
+*.cache
+*.bak
+*.swp
+__MACOSX/
+
+# ==================== OS SPECIFIC ====================
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ==================== NODE & FRONTEND (if applicable) ====================
+node_modules/
+npm-debug.log
+yarn-error.log
+dist/
+build/
+
+# ==================== DATABASE ====================
+*.sqlite
+*.db
+*.sqlite3
+
+# ==================== MISCELLANEOUS ====================
+.python-version
+.ipynb_checkpoints/
+.mypy_cache/
+.dmypy.json
+.pyre/

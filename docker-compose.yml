@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # -----------------------------------
+  # 1. DATABASE: PostgreSQL + TimescaleDB
+  # -----------------------------------
+  db:
+    image: timescale/timescaledb:latest-pg15
+    container_name: logimind_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: logimind_admin
+      POSTGRES_PASSWORD: admin_password
+      POSTGRES_DB: logimind
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # -----------------------------------
+  # 2. EVENT BUS: Zookeeper & Kafka
+  # -----------------------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: logimind_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: logimind_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  # Kafka UI for easy visualization of real-time events
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: logimind_kafka_ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  # -----------------------------------
+  # 3. BACKEND: FastAPI Service
+  # -----------------------------------
+  backend:
+    build: ./backend
+    container_name: logimind_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - kafka
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://logimind_admin:admin_password@db:5432/logimind
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata:
