@@ -11,11 +11,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const truckIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/2766/2766156.png',
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
-  popupAnchor: [0, -35],
+// 3D Isometric Delivery Truck
+const truckIcon = L.divIcon({
+  className: 'clear-leaflet-styles',
+  html: `
+    <div style="
+      filter: drop-shadow(0px 10px 8px rgba(0,0,0,0.6)); 
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    ">
+      <img 
+        src="https://cdn-icons-png.magnific.com/256/683/683078.png?semt=ais_white_label" 
+        style="width: 30px; height: 30px; object-fit: contain;" 
+        alt="3D Delivery Truck" 
+      />
+    </div>
+  `,
+  iconSize: [50, 50],
+  iconAnchor: [25, 25], // Centered on the GPS coordinate
+  popupAnchor: [0, -20],
 });
 
 // Helper component to smoothly pan the map as the truck moves

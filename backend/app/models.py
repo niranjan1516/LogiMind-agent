@@ -16,6 +16,24 @@ class Driver(Base):
     
     # Establish a relationship so you can easily access a driver's telemetry history via ORM
     telemetry = relationship("VehicleTelemetry", back_populates="driver")
+    orders = relationship("Order", back_populates="driver")
+    
+class Order(Base):
+    __tablename__ = "orders"
+
+    order_id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    client_phone = Column(String(20), nullable=False)
+    pickup_location = Column(String(255), nullable=False)
+    drop_location = Column(String(255), nullable=False)
+    weight_kg = Column(Float, nullable=False)
+    scheduled_time = Column(DateTime(timezone=True), nullable=False)
+    status = Column(String(50), default="PENDING") # PENDING, DISPATCHED, IN_TRANSIT, DELIVERED
+    
+    # Link the order to a specific driver
+    driver_id = Column(UUID(as_uuid=True), ForeignKey('drivers.driver_id'), nullable=True)
+    
+    # Relationship
+    driver = relationship("Driver", back_populates="orders")
 
 
 class VehicleTelemetry(Base):

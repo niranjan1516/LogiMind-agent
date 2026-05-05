@@ -9,20 +9,29 @@ const DemandChart = ({ city }) => {
   useEffect(() => {
     const fetchForecast = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/forecast/${city}`);
-        // Transform the data for Recharts
-        const chartData = response.data.forecast.map(item => ({
-          time: new Date(item.timestamp).getHours() + ":00",
-          volume: item.predicted_volume
-        }));
-        setData(chartData);
+        // Updated to 127.0.0.1 to prevent CORS issues
+        const response = await axios.get(`http://127.0.0.1:8000/forecast/${city}`);
+        
+        console.log("Raw API Response:", response.data); // Debugging line!
+
+        // Safely check if the forecast array exists
+        if (response.data && response.data.forecast) {
+          const chartData = response.data.forecast.map(item => ({
+            // Handle timestamps safely
+            time: new Date(item.timestamp).getHours() + ":00",
+            volume: item.predicted_volume
+          }));
+          setData(chartData);
+        } else {
+          console.error("Forecast array is missing from the API response.");
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error fetching forecast:", error);
         setLoading(false);
       }
     };
-
+    
     fetchForecast();
   }, [city]);
 

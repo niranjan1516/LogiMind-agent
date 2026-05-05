@@ -4,3 +4,14 @@
 body {
   @apply bg-slate-900 text-white;
 }
+
+/* --- Swiggy-Style Smooth Gliding --- */
+.leaflet-marker-icon {
+  /* This forces the marker to smoothly animate over 2 seconds to match our API polling! */
+  transition: transform 2s linear !important; 
+}
+
+.clear-leaflet-styles {
+  background: transparent;
+  border: none;
+}
