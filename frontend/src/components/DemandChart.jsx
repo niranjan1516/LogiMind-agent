@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import axios from 'axios';
+import { API_BASE_URL } from '../lib/api';
 
 const DemandChart = ({ city }) => {
   const [data, setData] = useState([]);
@@ -9,10 +10,7 @@ const DemandChart = ({ city }) => {
   useEffect(() => {
     const fetchForecast = async () => {
       try {
-        // Updated to 127.0.0.1 to prevent CORS issues
-        const response = await axios.get(`http://127.0.0.1:8000/forecast/${city}`);
-        
-        console.log("Raw API Response:", response.data); // Debugging line!
+        const response = await axios.get(`${API_BASE_URL}/forecast/${city}`);
 
         // Safely check if the forecast array exists
         if (response.data && response.data.forecast) {

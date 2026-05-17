@@ -73,6 +73,9 @@ services:
     environment:
       - DATABASE_URL=postgresql://logimind_admin:admin_password@db:5432/logimind
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - BACKEND_CORS_ORIGINS=http://localhost:5173,http://localhost:8081,http://10.149.219.200:8081
+      - AUTO_CREATE_TABLES=true
+      - DEV_DRIVER_OTP=1234
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 volumes:
