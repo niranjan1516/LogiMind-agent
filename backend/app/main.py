@@ -41,28 +41,6 @@ def normalize_phone_number(phone_number: str) -> str:
         return digits[2:]
     return digits
 
-app = FastAPI(title="LogiMind OS API", version="1.0.0")
-
-DEFAULT_CORS_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:8081",
-    "http://127.0.0.1:8081",
-    "http://10.149.219.200:8081",
-]
-allowed_origins = [
-    origin.strip()
-    for origin in os.getenv("BACKEND_CORS_ORIGINS", ",".join(DEFAULT_CORS_ORIGINS)).split(",")
-    if origin.strip()
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # ==========================================
 # PYDANTIC SCHEMAS (Data Validation)
@@ -103,6 +81,38 @@ class TelemetryUpdate(BaseModel):
 # ==========================================
 # ENDPOINTS
 # ==========================================
+
+from contextlib import asynccontextmanager
+from .database import engine, Base
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # This runs ON STARTUP. If it fails, we get a clear log message.
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("📁 Database tables synchronized successfully.")
+    except Exception as e:
+        print(f"❌ Database connection failed at startup: {e}")
+    yield
+    # Any cleanup code runs here on shutdown
+
+# 1. Initialize the app ONCE with title, version, AND lifespan
+app = FastAPI(title="LogiMind OS API", version="1.0.0", lifespan=lifespan)
+
+DEFAULT_CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    # add your production frontend URL here later!
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=DEFAULT_CORS_ORIGINS, # <--- Use the exact list 
+    allow_credentials=True,             # <--- Now this is perfectly legal
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 def read_root():
