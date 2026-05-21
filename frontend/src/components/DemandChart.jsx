@@ -1,61 +1,65 @@
-import { useEffect, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import  { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../lib/api';
+// Import your chart components (like Chart.js or Recharts) here
 
-const DemandChart = ({ city }) => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+const DemandChart = () => {
+  // 1. Create a state variable for the city, defaulting to Mumbai
+  const [selectedCity, setSelectedCity] = useState("Mumbai");
+  const [forecastData, setForecastData] = useState(null);
+  const [error, setError] = useState(false);
 
+  // 2. Add selectedCity to the dependency array so it refetches when changed
   useEffect(() => {
     const fetchForecast = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/forecast/${city}`);
-
-        // Safely check if the forecast array exists
-        if (response.data && response.data.forecast) {
-          const chartData = response.data.forecast.map(item => ({
-            // Handle timestamps safely
-            time: new Date(item.timestamp).getHours() + ":00",
-            volume: item.predicted_volume
-          }));
-          setData(chartData);
-        } else {
-          console.error("Forecast array is missing from the API response.");
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching forecast:", error);
-        setLoading(false);
+        // 3. Use template literals (backticks) to insert the dynamic city variable
+        const response = await axios.get(`https://logimind-api.onrender.com/forecast/${selectedCity}`);
+        setForecastData(response.data);
+        setError(false);
+      } catch (err) {
+        console.error("Error fetching forecast:", err);
+        setError(true);
       }
     };
-    
-    fetchForecast();
-  }, [city]);
 
-  if (loading) return <div className="text-slate-500 animate-pulse">Loading Brain Data...</div>;
+    fetchForecast();
+  }, [selectedCity]); // <--- This tells React to run the effect again if the city changes
+
+  // 4. Create a handler function for when the user picks a new city
+  const handleCityChange = (event) => {
+    setSelectedCity(event.target.value);
+  };
 
   return (
-    <div className="w-full h-64">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="time" stroke="#94a3b8" fontSize={12} />
-          <YAxis stroke="#94a3b8" fontSize={12} />
-          <Tooltip 
-            contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-            itemStyle={{ color: '#10b981' }}
-          />
-          <Line 
-            type="monotone" 
-            dataKey="volume" 
-            stroke="#10b981" 
-            strokeWidth={3} 
-            dot={{ r: 4 }} 
-            activeDot={{ r: 8 }} 
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="p-4 bg-white rounded shadow">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Demand Forecast</h2>
+        
+        {/* 5. Add a dropdown menu to select the city */}
+        <select 
+          value={selectedCity} 
+          onChange={handleCityChange}
+          className="border p-2 rounded"
+        >
+          <option value="Mumbai">Mumbai</option>
+          <option value="Pune">Pune</option>
+          <option value="Kolhapur">Kolhapur</option>
+          <option value="Goa">Goa</option>
+          {/* Add more cities as needed */}
+        </select>
+      </div>
+
+      {/* Render your chart or error state here */}
+      {error ? (
+        <p className="text-red-500">Failed to load data for {selectedCity}.</p>
+      ) : forecastData ? (
+        <div>
+           {/* Your Chart Component goes here using forecastData */}
+           <p>Data loaded successfully for {selectedCity}!</p>
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 };
